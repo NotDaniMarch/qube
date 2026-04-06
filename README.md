@@ -10,7 +10,7 @@ quantum computing.
 You are in a room with obstacles, and you need to get from place A to place B. You are a
 cube that has low enegry (dark color) or high energy (bright color). The obstacles come in
 the form of pads that you have to stand on to move/remove walls, doors letting only one
-energy level through, and killing blocks that end the game or remove a twin cube. You can
+energy level through, and killing blocks that kill both cubes. You can
 split into two energy level players, control them together, and go back into just one state
 either voluntarily (choose the instance to keep) or involuntarily (random instance is
 chosen) when an observation block is touched.
@@ -52,15 +52,13 @@ require a certain energy level.
    - The same way two cubes can be reduced to one. The player can choose which cube to leave and which to keep, but if the player touches an observation block, then one player instance
 is randomly selected to stay.
    - The main challenge is to find a way to split, move, and reduce the cube to get to the destination (e.g. activating two corresponding pads at the same time to open a door). Such mechanic aims to make a unique and enjoyable gaming experience.
-  
-
-4. There are killing blocks. If player touches it, the game will stop or if it’s only an instance of
-player it gets removed.
+3. There are killing blocks. If player touches it, the cube or both instances of
+it get removed.
 
 ### Winning and Losing Conditions
 The game ends in success if the player or its instance reaches the destination B. If the
 destination is not reachable anymore (e.g. result of observation) then it can be considered
-as losing and the player can press reset button. If the player (not in superposition) touches
+as losing and the player can press reset button. If the player touches
 the killing block it’s also a loss.
 
 ### Platform and Tools
