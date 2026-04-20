@@ -34,6 +34,7 @@ interference before applying Hadamard gate again.
 the observation concept and measurement.
 This makes the implementation conceptual (the quantum concepts are represented in
 different and interacive form), state-based (the player state is manipulated), and gatebased (the players can apply X, H, and Z gates).
+
 How it goes beyond classical probabilistical model:
 - Superposition (player splitting) allows simultaneous exploration of multiple paths.
 - Interference can give deterministic outcomes through phase manipulation, not just
