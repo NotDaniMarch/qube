@@ -10,10 +10,10 @@ quantum computing.
 You are in a room with obstacles, and you need to get from place A to place B. You are a
 cube that has low enegry (dark color) or high energy (bright color). The obstacles come in
 the form of pads that you have to stand on to move/remove walls, doors letting only one
-energy level through, and killing blocks that kill both cubes. You can
+energy level through, and killing blocks that observe and/or kill qube. You can
 split into two energy level players, control them together, and go back into just one state
 either voluntarily (choose the instance to keep) or involuntarily (random instance is
-chosen) when an observation block is touched.
+chosen) when an observation, kill, or goal block is touched.
 
 ### Thematic Focus
 The theme of the game is exploring quantum mechanics through interactive problemsolving. The theme is integrated into gameplay by representing the player as a qubit and
@@ -30,7 +30,7 @@ The main quantum concepts:
 - Player splitting is superposition of low and high energy states.
 - Choosing a particular cube to keep is the equvalent of applying Z gate for
 interference before applying Hadamard gate again.
-- The observation block chooses random instance of player to stay which describes
+- The observation, killing, and goal blocks choose random instance of player to stay which describes
 the observation concept and measurement.
 This makes the implementation conceptual (the quantum concepts are represented in
 different and interacive form), state-based (the player state is manipulated), and gatebased (the players can apply X, H, and Z gates).
@@ -50,17 +50,15 @@ require a certain energy level.
    - Players can enter the superposition of two cubes (low and high energy)
    - Both cubes move at the same time reacting to the same keypresses (similar to "The Swapper" game)
    - They initially overlap but get seperated when passing through filter doors (e.g. low energy door lets low energy cube pass through while acting as a wall for the high energy cube)
-   - The same way two cubes can be reduced to one. The player can choose which cube to leave and which to keep, but if the player touches an observation block, then one player instance
+   - The same way two cubes can be reduced to one. The player can choose which cube to leave and which to keep, but if the player touches an observation, killing, or goal block, then one player instance
 is randomly selected to stay.
    - The main challenge is to find a way to split, move, and reduce the cube to get to the destination (e.g. activating two corresponding pads at the same time to open a door). Such mechanic aims to make a unique and enjoyable gaming experience.
-3. There are killing blocks. If player touches it, the cube or both instances of
-it get removed.
+3. There are killing blocks. If player touches it, the qube or it's instance get removed.
 
 ### Winning and Losing Conditions
-The game ends in success if the player or its instance reaches the destination B. If the
+The game ends in success if the player or its instance reaches the destination B (in superposition winning is 50%). If the
 destination is not reachable anymore (e.g. result of observation) then it can be considered
-as losing and the player can press reset button. If the player touches
-the killing block it’s also a loss.
+as losing and the player can press reset button. If the qube gets removed (by killing blocks) it’s also a loss.
 
 ### Platform and Tools
 I plan to code the game in Python (Pygame), the full playable version. The minimum
