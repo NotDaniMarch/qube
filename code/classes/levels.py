@@ -1,4 +1,5 @@
 from enum import Enum
+import copy
 
 from .player import *
 from .button import Button
@@ -31,37 +32,61 @@ LEVELS = {
     },
     "superposition": {
         "layout": [
-            "####################",
-            "#....H...K.....K...#",
-            "#....H...K..K.....Q#",
-            "#....#......K..K...#",
-            "#.S..###############",
-            "#.............E...G#",
-            "#.............E...G#",
-            "####################",
+            "#####################",
+            "#....H..##..D..DQ..G#",
+            "#....H..Q#..#..DQ..G#",
+            "#....H......#..DQ..G#",
+            "#.S..################",
+            "#....L...E.##..PE..G#",
+            "#....L.###.P#..PE..G#",
+            "#....L.###.....PE..G#",
+            "#####################",
         ],
         "comments": {
             "text": (
                 "This level seems impossible, huh.\n"
-                "There is high energy plate (+) that opens the wall.\n"
-                "Jokes on you, level creator, we have the power of superosition!\n"
+                "There's plates that open walls - you gotta stand on them.\n"
+                "Just make sure that your energy/shape mathes the plate.\n"
                 "If you apply Hadamard gate to a qubit, it exists in both states.\n"
-                "Try pressing [H], now you're in superosition of both states."
+                "Try pressing [H], now you're in superosition."
             ),
             "color": (0, 0, 255),
         },
     },
-    "interference": {
+    "observation": {
         "layout": [
             "####################",
-            "#KPPPPL.S..D...L...#",
-            "#######....D...L...#",
-            "#######..###...#EEE#",
-            "#######..###KK.#...#",
-            "###...D..###...#GGG#",
-            "#PH...D..###.KK#####",
-            "###...D..###.....Q##",
+            "#.......K##OO.E...G#",
+            "#..S..O.K.....E...G#",
+            "#.....O....OO.E...G#",
+            "##HHH###############",
+            "##...#O.....O....###",
+            "##........K...Q..###",
+            "##KKK#....K.O....###",
             "####################",
+        ],
+        "comments": {
+            "text": (
+                "Observation collapses superposition into one state.\n"
+                "It is random — you cannot choose the result.\n"
+                "White dots, red cubes, and green cubes observe you.\n"
+                "After observation you may end up killed or miss the goal.\n"
+                "So I would recommend pressing [H] before finish."
+            ),
+            "color": (255, 255, 0),
+        },
+    },
+    "interference": {
+        "layout": [
+            "######################",
+            "#KPPPPL.S..D...L...###",
+            "#######....D...L...###",
+            "#######..###...##EE###",
+            "#######..###KK.##...G#",
+            "###...D..###...##...G#",
+            "#PH...D..###.KK#######",
+            "###...D..###.....Q####",
+            "######################",
         ],
         "comments": {
             "text": (
@@ -74,7 +99,7 @@ LEVELS = {
             "color": (255,0,255),
         },
     },
-    "observation": {
+    "bonus": {
         "layout": [
             "#########################",
             "##Q#####KK......##..O..G#",
@@ -88,10 +113,11 @@ LEVELS = {
         ],
         "comments": {
             "text": (
-                "Those white dots are watching 0_0\n"
-                "Observation collapses superposition into one state.\n"
-                "It is random — you cannot choose the result.\n"
-                "One state survives, the other disappears."
+                "Now you know how to operate the qube.\n"
+                "You also know the basic quantum mechanics of the qubit.\n"
+                "This is one more bonus level.\n"
+                "Have fun!\n"
+                ":D"
             ),
             "color": (255,0,0),
         },
@@ -160,7 +186,12 @@ class Level:
 
     # Get the tile type on x, y
     def get_tile(self, x, y):
-        return Tile.from_char(self.tiles[x][y])
+        return Tile.from_char(self.tiles[y][x])
+    
+    # Get the tile below a cube
+    def get_cube_tile(self, cube):
+        x, y = cube.get_position()
+        return Tile.from_char(self.tiles[y][x])
     
     # Get the start tile coordinates
     def get_start_position(self):
@@ -185,11 +216,12 @@ class Level:
     def tile_occupied(self, x, y):
         return any(cube.x == x and cube.y == y for cube in self.qube.cubes)
 
-    def plate_pressed(self, energy):
-        if self.qube.dead() or not self.qube.superposed(): return False
+    def plate_pressed(self, energy, qube=None):
+        if qube == None: qube = self.qube
+        if qube.dead() or not qube.superposed(): return False
 
         plates = self.low_plates if energy.low() else self.high_plates
-        cube = self.qube.get_position(energy)
+        cube = qube.get_position(energy)
 
         return cube in plates
 
@@ -197,44 +229,43 @@ class Level:
     # Tile interactions
     # =========================
 
-    # Indicates if the level layout allows player to move
-    def can_move(self, energy, y, x):
-        tile = self.get_tile(x,y)
-        
-        # Wall
-        if tile == Tile.WALL:
-            return
-
-        # Energy doors
-        if tile == Tile.DOOR_LOW and energy != Energy.LOW:
-            return
-        if tile == Tile.DOOR_HIGH and energy != Energy.HIGH:
-            return
-
-        # Linked doors
-        if tile == Tile.LINKED_WALL_LOW and not self.plate_pressed(Energy.LOW):
-            return
-        if tile == Tile.LINKED_WALL_HIGH and not self.plate_pressed(Energy.HIGH):
-            return
-        
-        return True
-
     # Influence the player state depending on the tile they have stepped in
-    def update_collisions(self):
+    def update(self, dx, dy):
+        sim_qube = copy.deepcopy(self.qube)
+        sim_qube.move(dx, dy)
+
+        # Check if move is possible and update player position(s)
+        for cube, sim_cube in zip(self.qube.cubes, sim_qube.cubes):
+            tile = self.get_cube_tile(sim_cube)
+            blocked = (
+                tile == Tile.WALL or
+                (tile == Tile.DOOR_LOW and sim_cube.energy != Energy.LOW) or
+                (tile == Tile.DOOR_HIGH and sim_cube.energy != Energy.HIGH) or
+                # Check both current position and simulated movement for plate state evaluation
+                (tile == Tile.LINKED_WALL_LOW and not self.plate_pressed(Energy.LOW, sim_qube) and not self.plate_pressed(Energy.LOW, self.qube)) or
+                (tile == Tile.LINKED_WALL_HIGH and not self.plate_pressed(Energy.HIGH, sim_qube) and not self.plate_pressed(Energy.HIGH, self.qube))
+            )
+            if not blocked: cube.move(dx, dy)
+
         state = GameState.LEVEL
 
+        # Check collisions and update game state
         for cube in self.qube.cubes:
-            match self.get_tile(cube.y, cube.x):
+            match self.get_cube_tile(cube):
                 case Tile.KILL:
                     self.qube.kill()
-                    state = GameState.LOSE
+                    if self.qube.dead(): state = GameState.LOSE
                     break
                 case Tile.OBSERVE:
                     self.qube.observe()
                     break
                 case Tile.GOAL:
                     self.qube.kill()
-                    state = GameState.WIN
+
+                    # GOAL block is killing (removing) qube/twin
+                    # if block gets removed it counts as winning
+                    # if a twin "survives" then the win doesn't happen
+                    if self.qube.dead(): state = GameState.WIN
 
         return state
     

@@ -74,12 +74,6 @@ class Game:
                         return
                     if event.key == pygame.K_r:
                         self.level.start()
-                    if event.key == pygame.K_1:
-                        self.state = GameState.WIN
-                        return
-                    if event.key == pygame.K_2:
-                        self.state = GameState.LOSE
-                        return
                     if event.key == pygame.K_LEFT: dx = -1
                     if event.key == pygame.K_RIGHT: dx = 1
                     if event.key == pygame.K_UP: dy = -1
@@ -97,11 +91,8 @@ class Game:
                     if event.key == pygame.K_h:
                         qube.hadamard()
 
-            # Move the player
-            qube.move(self.level, dx, dy)
-
-            # Decide state from collision with tiles
-            self.state = self.level.update_collisions()
+            # Update the level (including player position) and the game state
+            self.state = self.level.update(dx, dy)
 
             # Draw the level on the screen
             render.level(self.screen, self.level)

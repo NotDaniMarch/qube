@@ -25,12 +25,9 @@ class Cube:
         self.x = x
         self.y = y
 
-    def move(self, level, dx, dy):
-        x, y = self.x + dx, self.y + dy
-
-        if level.can_move(self.energy, x, y):
-            self.x = x
-            self.y = y
+    def move(self, dx, dy):
+        self.x = self.x + dx
+        self.y = self.y + dy
 
     def get_position(self):
         return self.x, self.y
@@ -41,12 +38,17 @@ class Qube:
         self.cubes = [Cube(Energy.LOW, x, y)]   # The component cubes for superposition, in case of single instance it's just the player
         self.z = Energy.LOW                     # The current Z choise
 
-    def move(self, level, dx, dy):
+    def move(self, dx, dy):
         for cube in self.cubes:
-            cube.move(level, dx, dy)
+            cube.move(dx, dy)
 
+    # Kill the player, if qube is in superposition - observe it
     def kill(self):
-        self.cubes = []
+        if len(self.cubes) < 2:
+            self.cubes = []
+        else:
+            survivor = random.choice(self.cubes)
+            self.cubes = [survivor] # will be chosen to live, but will die if positioned directly on the same killing block
 
     # =========================
     # Quantum behaviour
